@@ -1,7 +1,11 @@
 # YOLO_DeepSORT
+
 Detect using [YOLOv2](https://pjreddie.com/darknet/) and track using [DeepSORT](https://github.com/nwojke/deep_sort)
 
-# Usage
+## Reuqirement
+	tensorflow >= 1.0
+	cv2, numpy
+	
 ## Arch
 ```shell
 YOLO_DeepSORT/
@@ -27,9 +31,12 @@ YOLO_DeepSORT/
 
 ├──your_yolo_lib_file.so
 ```
-## Run
+## remember to modify *_path in deep_sort_app.py
+
+## How to run
+
 ```python
-python deep_sort_app.py --display true
+python deep_sort_app.py  --display true
 ```
 
 # NOTICE
@@ -60,6 +67,7 @@ If you find DeepSORT useful in your research, please consider citing the followi
       pages={3464-3468},
       doi={10.1109/ICIP.2016.7533003}
     }
+		
  ## YOLOv2:Good, Good, Good
  Umm, he do not like this.
  [YOLOv2](https://pjreddie.com/darknet/)
