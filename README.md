@@ -43,7 +43,7 @@ python deep_sort_app.py  --display true
 The tensorflow ckpt file can be download from [here](https://owncloud.uni-koblenz.de/owncloud/s/f9JB0Jr7f3zzqs8).
 See [DeepSORT](https://github.com/nwojke/deep_sort).
 
-You can compile your own yolo lib file, but be sure that all the function have the same usage as those in yolov2.py.
+You can compile your own yolo lib file, but be sure that all the functions have the same usage as those in yolov2.py.
 
 # Citation
 
