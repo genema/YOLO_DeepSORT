@@ -1,41 +1,45 @@
-## YOLO_DeepSORT
+# YOLO_DeepSORT
 Detect using [YOLOv2](https://pjreddie.com/darknet/) and track using [DeepSORT](https://github.com/nwojke/deep_sort)
 
-## Usage
-
+# Usage
+```shell
 YOLO_DeepSORT/
 ├── backup
 	├── yolo_model_weights_file.weights  
 	...
-├──cfg
-  ├──yolo_model_config_file.cfg
-  ├──yolo_model_class_type_file.data
-├──resources
-  ├──networks
-    ├──tensorflow_model_weights_file.ckpt
-├──0130
-  ├──01
-    ├──det
-    ├──img1
-      ├──your_video_frames.jpg
-      ...
-├──temp
-├──your_yolo_lib_file.so
 
+├──cfg
+  	├──yolo_model_config_file.cfg
+  	├──yolo_model_class_type_file.data
+├──resources
+  	├──networks
+    		├──tensorflow_model_weights_file.ckpt
+
+├──0130
+  	├──01
+    		├──det
+    		├──img1
+      			├──your_video_frames.jpg
+      			...
+
+├──temp
+
+├──your_yolo_lib_file.so
+```
 
 ```python
 python deep_sort_app.py --display true
 ```
 
-## NOTICE
+# NOTICE
 The tensorflow ckpt file can be download from [here](https://owncloud.uni-koblenz.de/owncloud/s/f9JB0Jr7f3zzqs8).
 See [DeepSORT](https://github.com/nwojke/deep_sort).
 
 You can compile your own yolo lib file, but be sure that all the function have the same usage as those in yolov2.py.
 
-## Citation
+# Citation
 
-# DeepSORT
+## DeepSORT
 
 If you find DeepSORT useful in your research, please consider citing the following papers:
 
@@ -55,7 +59,7 @@ If you find DeepSORT useful in your research, please consider citing the followi
       pages={3464-3468},
       doi={10.1109/ICIP.2016.7533003}
     }
- # YOLOv2:Good, Good, Good
+ ## YOLOv2:Good, Good, Good
  Umm, he do not like this.
  [YOLOv2](https://pjreddie.com/darknet/)
 
