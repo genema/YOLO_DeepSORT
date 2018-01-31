@@ -125,7 +125,7 @@ class Visualization(object):
         cv2.imwrite(name, self.viewer.image.copy())
 
     def draw_locus(self, t_id):
-        for i in xrange(len(self.cent_p[t_id])-1):
+        for i in range(len(self.cent_p[t_id])-1):
             self.viewer.line(self.cent_p[t_id][i], self.cent_p[t_id][i+1])
 
     def draw_groundtruth(self, track_ids, boxes):
