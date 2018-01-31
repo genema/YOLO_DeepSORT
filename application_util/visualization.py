@@ -166,7 +166,17 @@ class Visualization(object):
                 x, y, w, h = track.to_tlwh().astype(np.int)
                 xx = x + .5*w
                 yy = y + .5*h
-                self.cent_p[track.track_id].append([xx.astype(np.int), yy.astype(np.int)])
+                flag = False
+                if len(self.cent_p[track.track_id]) < 2:
+                    flag = True
+                else:
+                    xx_prev, yy_prev = self.cent_p[track.track_id][-1]
+                    prev = np.array([xx_prev, yy_prev])
+                    cur  = np.array([xx, yy])
+                    if np.sum(np.abs(prev-cur)) > 10:
+                        flag = True
+                if flag:
+                    self.cent_p[track.track_id].append([xx.astype(np.int), yy.astype(np.int)])
                 self.draw_locus(track.track_id)
 
 #
