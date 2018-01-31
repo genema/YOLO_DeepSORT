@@ -1,0 +1,5 @@
+classes=11
+train=/home/ghma/darknet_train/scripts/train1016.txt
+names=data/topsky_0921.names
+backup=backup_1016
+
