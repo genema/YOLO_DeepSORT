@@ -2,6 +2,7 @@
 Detect using [YOLOv2](https://pjreddie.com/darknet/) and track using [DeepSORT](https://github.com/nwojke/deep_sort)
 
 # Usage
+## Arch
 ```shell
 YOLO_DeepSORT/
 ├── backup
@@ -26,7 +27,7 @@ YOLO_DeepSORT/
 
 ├──your_yolo_lib_file.so
 ```
-
+## Run
 ```python
 python deep_sort_app.py --display true
 ```
