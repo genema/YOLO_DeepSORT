@@ -2,7 +2,7 @@
 # @Author:
 # @Date:   2018-01-29 14:12:46
 # @Last Modified by:   ghma
-# @Last Modified time: 2018-01-31 14:39:20
+# @Last Modified time: 2018-01-31 14:50:34
 from __future__ import division, print_function, absolute_import
 
 import argparse
@@ -149,7 +149,15 @@ def run_ghma(sequence_dir, detection_file, output_file,
 
     first_idx    = seq_info["min_frame_idx"]
     last_idx     = seq_info["max_frame_idx"]
-    if not os.path.getsize('0130/01/det/det.txt'):
+    if os.path.isfile('0130/01/det/det.txt'):
+        if not os.path.getsize('0130/01/det/det.txt'):
+            detFlag = False
+        else:
+            detFlag = True
+    else:
+        detFlag = False
+
+    if not detFlag:
         net  = load_net(cfg_path, weight_path, 0)
         meta = load_meta(meta_path)
         det_file = open('0130/01/det/det.txt', 'w')
@@ -162,8 +170,17 @@ def run_ghma(sequence_dir, detection_file, output_file,
         det_file.close()
     else:
         print(">> Detections already exsits, skip yolo detection step")
-    #seq_info = gather_sequence_info(sequence_dir, "./temp")
-    if not os.path.getsize('./temp/01.npy'):
+
+    #seq_info = gather_sequence_info(sequence_dir, "./temp")\
+    if os.path.isfile('./temp/01.npy'):
+        if not os.path.getsize('./temp/01.npy'):
+            extFlag = False
+        else:
+            extFlag = True
+    else:
+        extFlag = False
+
+    if not extFlag:
         f = create_box_encoder("resources/networks/mars-small128.ckpt-68577", batch_size=32, loss_mode="cosine")
         generate_detections(f, "./0130/", "./temp/", None)
     else:
