@@ -156,7 +156,7 @@ def _create_network(incoming, num_classes, reuse=None, l2_normalize=True,
         summarize_activations=create_summaries)
 
     feature_dim = network.get_shape().as_list()[-1]
-    print("feature dimensionality: ", feature_dim)
+    #print("feature dimensionality: ", feature_dim)
     network = slim.flatten(network)
 
     network = slim.dropout(network, keep_prob=0.6)
@@ -420,12 +420,22 @@ def generate_detections(encoder, mot_dir, output_dir, detection_dir=None):
             bgr_image = cv2.imread(
                 image_filenames[frame_idx], cv2.IMREAD_COLOR)
             features = encoder(bgr_image, rows[:, 2:6].copy())
-            detections_out += [np.r_[(row, feature)] for row, feature
-                               in zip(rows, features)]
+            detections_out += [np.r_[(row, feature)] for row, feature in zip(rows, features)]
 
         output_filename = os.path.join(output_dir, "%s.npy" % sequence)
-        np.save(
-            output_filename, np.asarray(detections_out), allow_pickle=False)
+        np.save(output_filename, np.asarray(detections_out), allow_pickle=False)
+
+
+def generate_detections_single(encoder, img_path, det):
+    bgr_image = cv2.imread(img_path, cv2.IMREAD_COLOR)
+    detections_out = []
+    if bgr_image is None:
+        print("ERR : load image {} failed".format(img_path))
+    else:
+
+        features = encoder(bgr_image, det[:, 2:6].copy())
+        detections_out += [np.r_[(row, feature)] for row, feature in zip(det, features)]
+        det = np.asarray(detections_out)
 
 
 def parse_args():

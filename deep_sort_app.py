@@ -2,12 +2,11 @@
 # @Author:
 # @Date:   2018-01-29 14:12:46
 # @Last Modified by:   ghma
-# @Last Modified time: 2018-01-31 14:50:34
+# @Last Modified time: 2018-02-05 17:22:59
 from __future__ import division, print_function, absolute_import
 
 import argparse
 import os
-
 import cv2
 import numpy as np
 
@@ -19,6 +18,7 @@ from deep_sort.tracker import Tracker
 from yolov2 import yolov2 as detect_
 from yolov2 import load_meta, load_net
 from generate_detections import create_box_encoder, generate_detections
+from generate_detections import generate_detections_single
 
 
 meta_path   = b'cfg/topsky_1016.data'
@@ -62,8 +62,8 @@ def gather_sequence_info(sequence_dir, detection_file):
     if detection_file is not None:
         detections = np.load(detection_file)
     groundtruth = None
-    if os.path.exists(groundtruth_file):
-        groundtruth = np.loadtxt(groundtruth_file, delimiter=',')
+    #if os.path.exists(groundtruth_file):
+    #    groundtruth = np.loadtxt(groundtruth_file, delimiter=',')
 
     if len(image_filenames) > 0:
         image = cv2.imread(next(iter(image_filenames.values())),
@@ -138,9 +138,29 @@ def create_detections(detection_mat, frame_idx, min_height=0):
     return detection_list
 
 
+def calc_cur_det(net, meta, encoder, seq_info, frame_idx, min_confidence):
+    det = []
+    result = detect_(net, meta,
+                    seq_info["image_filenames"][frame_idx].encode('utf-8'),
+                    11,
+                    target=range(8),
+                    thresh=min_confidence)
+    for j in range(len(result)):
+        det.append(
+            [frame_idx,result[j][0],result[j][2],result[j][3],result[j][4],result[j][5],result[j][1],-1,-1,-1]
+            )
+
+    generate_detections_single(encoder, seq_info["image_filenames"][frame_idx].encode('utf-8'), np.asarray(det))
+    detection_list = []
+    for row in det:
+        bbox, confidence, feature = row[2:6], row[6], row[10:]
+        detection_list.append(Detection(bbox, confidence, feature))
+    return detection_list
+
+
 def run_ghma(sequence_dir, detection_file, output_file,
-            min_confidence, nms_max_overlap, min_detection_height, max_cosine_distance,
-            nn_budget, display):
+            min_confidence, nms_max_overlap, min_detection_height, max_cosine_distance, nn_budget,
+            display, run_type):
 
     seq_info     = gather_sequence_info(sequence_dir, detection_file)
     image_shape  = seq_info["image_size"][::-1]
@@ -149,53 +169,73 @@ def run_ghma(sequence_dir, detection_file, output_file,
 
     first_idx    = seq_info["min_frame_idx"]
     last_idx     = seq_info["max_frame_idx"]
-    if os.path.isfile('0130/01/det/det.txt'):
-        if not os.path.getsize('0130/01/det/det.txt'):
+    #if pre_computed:
+    if run_type == "pre_computed":
+        print(" *********** Pre_computed mode ***********")
+        if os.path.isfile('0130/01/det/det.txt'):
+            if not os.path.getsize('0130/01/det/det.txt'):
+                detFlag = False
+            else:
+                detFlag = True
+        else:
             detFlag = False
+
+        if not detFlag:
+            net  = load_net(cfg_path, weight_path, 0)
+            meta = load_meta(meta_path)
+            det_file = open('0130/01/det/det.txt', 'w')
+            for idx in range(first_idx, last_idx+1):
+                print(idx)
+                result = detect_(net, meta,
+                            seq_info["image_filenames"][idx].encode('utf-8'),
+                            11,
+                            target=range(8),
+                            thresh=min_confidence)
+                for j in range(len(result)):
+                    det_file.write("%d,%d,%f,%f,%f,%f,%f,-1,-1,-1\n" %
+                        (idx, result[j][0], result[j][2], result[j][3], result[j][4], result[j][5], result[j][1]))
+            det_file.close()
         else:
-            detFlag = True
-    else:
-        detFlag = False
+            print(">> Detections already exsits, skip yolo detection step")
 
-    if not detFlag:
-        net  = load_net(cfg_path, weight_path, 0)
-        meta = load_meta(meta_path)
-        det_file = open('0130/01/det/det.txt', 'w')
-        for idx in range(first_idx, last_idx+1):
-            print(idx)
-            result = detect_(net, meta, seq_info["image_filenames"][idx].encode('utf-8'), 11, target=range(8))
-            for j in range(len(result)):
-                det_file.write("%d,%d,%f,%f,%f,%f,%f,-1,-1,-1\n" %
-                            (idx, result[j][0], result[j][2], result[j][3], result[j][4], result[j][5], result[j][1]))
-        det_file.close()
-    else:
-        print(">> Detections already exsits, skip yolo detection step")
-
-    #seq_info = gather_sequence_info(sequence_dir, "./temp")\
-    if os.path.isfile('./temp/01.npy'):
-        if not os.path.getsize('./temp/01.npy'):
+        if os.path.isfile('./temp/01.npy'):
+            if not os.path.getsize('./temp/01.npy'):
+                extFlag = False
+            else:
+                extFlag = True
+        else:
             extFlag = False
-        else:
-            extFlag = True
-    else:
-        extFlag = False
 
-    if not extFlag:
-        f = create_box_encoder("resources/networks/mars-small128.ckpt-68577", batch_size=32, loss_mode="cosine")
-        generate_detections(f, "./0130/", "./temp/", None)
+        if not extFlag:
+            f = create_box_encoder("resources/networks/mars-small128.ckpt-68577", batch_size=32, loss_mode="cosine")
+            generate_detections(f, "./0130/", "./temp/", None)
+        else:
+            print(">> Features already exists, skip extraction step")
+        seq_info = gather_sequence_info(sequence_dir, "./temp/01.npy")
+        metric   = nn_matching.NearestNeighborDistanceMetric("cosine", max_cosine_distance, nn_budget)
+        tracker  = Tracker(metric)
+        results  = []
+    elif run_type == "instant":
+        print(" *********** Instant Mode ***********")
+        encoder = create_box_encoder("resources/networks/mars-small128.ckpt-68577",
+                                        batch_size=32, loss_mode="cosine")
+        net     = load_net(cfg_path, weight_path, 0)
+        meta    = load_meta(meta_path)
+        metric  = nn_matching.NearestNeighborDistanceMetric("cosine", max_cosine_distance, nn_budget)
+        tracker = Tracker(metric)
+        results = []
     else:
-        print(">> Features already exists, skit extraction step")
-    seq_info = gather_sequence_info(sequence_dir, "./temp/01.npy")
-    metric   = nn_matching.NearestNeighborDistanceMetric("cosine", max_cosine_distance, nn_budget)
-    tracker  = Tracker(metric)
-    results  = []
+        raise Exception(" Unknown run type ")
 
     def frame_callback(vis, frame_idx):
         print("Processing frame %05d" % frame_idx)
 
         # Load image and generate detections.
-        detections = create_detections(seq_info["detections"], frame_idx, min_detection_height)
-        detections = [d for d in detections if d.confidence >= min_confidence]
+        if run_type == "pre_computed":
+            detections = create_detections(seq_info["detections"], frame_idx, min_detection_height)
+            detections = [d for d in detections if d.confidence >= min_confidence]
+        elif run_type == "instant":
+            detections = calc_cur_det(net, meta, encoder, seq_info, frame_idx, min_confidence)
 
         # Run non-maxima suppression.
         boxes      = np.array([d.tlwh for d in detections])
@@ -228,6 +268,7 @@ def run_ghma(sequence_dir, detection_file, output_file,
         visualizer = visualization.Visualization(seq_info, update_ms=100)
     else:
         visualizer = visualization.NoVisualization(seq_info)
+
     visualizer.run(frame_callback)
 
     # Store results.
@@ -235,98 +276,6 @@ def run_ghma(sequence_dir, detection_file, output_file,
     #for row in results:
     #    print('%d,%d,%.2f,%.2f,%.2f,%.2f,1,-1,-1,-1' % (
     #        row[0], row[1], row[2], row[3], row[4], row[5]),file=f)
-
-
-
-def run(sequence_dir, detection_file, output_file, min_confidence,
-        nms_max_overlap, min_detection_height, max_cosine_distance,
-        nn_budget, display):
-    """
-    while 1:
-        Run multi-target tracker on a particular sequence.
-
-        Parameters
-        ----------
-        sequence_dir : str
-            Path to the MOTChallenge sequence directory.
-        detection_file : str
-            Path to the detections file.
-        output_file : str
-            Path to the tracking output file. This file will contain the tracking
-            results on completion.
-        min_confidence : float
-            Detection confidence threshold. Disregard all detections that have
-            a confidence lower than this value.
-        nms_max_overlap: float
-            Maximum detection overlap (non-maxima suppression threshold).
-        min_detection_height : int
-            Detection height threshold. Disregard all detections that have
-            a height lower than this value.
-        max_cosine_distance : float
-            Gating threshold for cosine distance metric (object appearance).
-        nn_budget : Optional[int]
-            Maximum size of the appearance descriptor gallery. If None, no budget
-            is enforced.
-        display : bool
-            If True, show visualization of intermediate tracking results.
-
-    """
-    seq_info = gather_sequence_info(sequence_dir, detection_file)
-    metric   = nn_matching.NearestNeighborDistanceMetric("cosine", max_cosine_distance, nn_budget)
-    tracker  = Tracker(metric)
-    results  = []
-
-    def frame_callback(vis, frame_idx):
-        print("Processing frame %05d" % frame_idx)
-
-        # Load image and generate detections.
-        detections = create_detections(
-            seq_info["detections"], frame_idx, min_detection_height)
-        detections = [d for d in detections if d.confidence >= min_confidence]
-
-        # Run non-maxima suppression.
-        boxes = np.array([d.tlwh for d in detections])
-        scores = np.array([d.confidence for d in detections])
-        indices = preprocessing.non_max_suppression(
-            boxes, nms_max_overlap, scores)
-        detections = [detections[i] for i in indices]
-
-        # Update tracker.
-        tracker.predict()
-        tracker.update(detections)
-
-        # Update visualization.
-        if display:
-            image = cv2.imread(
-                seq_info["image_filenames"][frame_idx], cv2.IMREAD_COLOR)
-            vis.set_image(image.copy())
-            vis.draw_detections(detections)
-            vis.draw_trackers(tracker.tracks)
-            vis.draw_t(detections)
-
-        # Store results.
-        for track in tracker.tracks:
-            if not track.is_confirmed() or track.time_since_update > 1:
-                continue
-            bbox = track.to_tlwh()
-            results.append([
-                frame_idx, track.track_id, bbox[0], bbox[1], bbox[2], bbox[3]])
-
-    # Run tracker.
-    if display:
-        visualizer = visualization.Visualization(seq_info, update_ms=10)
-    else:
-        visualizer = visualization.NoVisualization(seq_info)
-    visualizer.run(frame_callback)
-
-    # Store results.
-    f = open(output_file, 'w')
-    track_temp = []
-    for row in results:
-        print('%d,%d,%.2f,%.2f,%.2f,%.2f,1,-1,-1,-1' % (
-            row[0], row[1], row[2], row[3], row[4], row[5]),file=f)
-        track_temp.append([int(x) for x in row[2:6]])
-    np.save('track.temp', np.array(track_temp))
 
 
 def parse_args():
@@ -361,7 +310,10 @@ def parse_args():
         "gallery. If None, no budget is enforced.", type=int, default=100)
     parser.add_argument(
         "--display", help="Show intermediate tracking results",
-        default=False, type=bool)
+        default=True, type=bool)
+    parser.add_argument(
+        "--run_type", help="Use pre_computed mode or instant mode",
+        default="Instant", type=str)
     return parser.parse_args()
 
 
@@ -375,4 +327,4 @@ if __name__ == "__main__":
     '''
     run_ghma(args.sequence_dir, args.detection_file, args.output_file,
             args.min_confidence, args.nms_max_overlap, args.min_detection_height,
-            args.max_cosine_distance, args.nn_budget, args.display)
+            args.max_cosine_distance, args.nn_budget, args.display, args.run_type)
