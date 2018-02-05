@@ -5,27 +5,28 @@ Detect using [YOLOv2](https://pjreddie.com/darknet/) and track using [DeepSORT](
 ## Reuqirement
 	tensorflow >= 1.0
 	cv2, numpy
-	
+
 ## Arch
 ```shell
 YOLO_DeepSORT/
 ├── backup
-	├── yolo_model_weights_file.weights  
+	├── yolo_model_weights_file.weights
 	...
 
 ├──cfg
-  	├──yolo_model_config_file.cfg
-  	├──yolo_model_class_type_file.data
-├──resources
-  	├──networks
-    		├──tensorflow_model_weights_file.ckpt
+	├──yolo_model_config_file.cfg
+	├──yolo_model_class_type_file.data
 
-├──0130
-  	├──01
-    		├──det
-    		├──img1
-      			├──your_video_frames.jpg
-      			...
+├──resources
+	├──networks
+		├──tensorflow_model_weights_file.ckpt
+
+├──0130 (it is a directory for frames saving)
+  ├──01 (the serial id)
+		├──det (for saving det.txt which contains all the detection informations)
+		├──img1
+			├──your_video_frames.jpg
+			...
 
 ├──temp
 
@@ -36,15 +37,17 @@ YOLO_DeepSORT/
 ## How to run
 
 ```shell
-python deep_sort_app.py  --display true
+python deep_sort_app.py  --display true --run_type instant
+python deep_sort_app.py  --display true --run_type pre_computed
 ```
 or
 ```shell
-python3 deep_sort_app.py --display true
+python3 deep_sort_app.py --display true --run_type instant
+python3 deep_sort_app.py --display true --run_type pre_computed
 ```
 ### see argparser() for more infomations about other arguments.
 
-### Have been tested using python 2.7/3.5/3.6 with tensorflow 1.2.0 (because I work with CUDA 8)
+### Have been tested under python 2.7/3.5/3.6 with tensorflow 1.2.0 (because I work with CUDA 8)
 
 # NOTICE
 The tensorflow ckpt file can be download from [here](https://owncloud.uni-koblenz.de/owncloud/s/f9JB0Jr7f3zzqs8).
@@ -74,8 +77,9 @@ If you find DeepSORT useful in your research, please consider citing the followi
       pages={3464-3468},
       doi={10.1109/ICIP.2016.7533003}
     }
-		
+
  ## YOLOv2:Good, Good, Good
+
  Umm, he do not like this.
  [YOLOv2](https://pjreddie.com/darknet/)
 
