@@ -35,9 +35,16 @@ YOLO_DeepSORT/
 
 ## How to run
 
-```python
+```shell
 python deep_sort_app.py  --display true
 ```
+or
+```shell
+python3 deep_sort_app.py --display true
+```
+### see argparser() for more infomations about other arguments.
+
+### Have been tested using python 2.7/3.5/3.6 with tensorflow 1.2.0 (because I work with CUDA 8)
 
 # NOTICE
 The tensorflow ckpt file can be download from [here](https://owncloud.uni-koblenz.de/owncloud/s/f9JB0Jr7f3zzqs8).
