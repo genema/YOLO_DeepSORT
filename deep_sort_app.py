@@ -2,7 +2,7 @@
 # @Author:
 # @Date:   2018-01-29 14:12:46
 # @Last Modified by:   ghma
-# @Last Modified time: 2018-02-05 17:22:59
+# @Last Modified time: 2018-02-05 17:32:50
 from __future__ import division, print_function, absolute_import
 
 import argparse
@@ -313,7 +313,7 @@ def parse_args():
         default=True, type=bool)
     parser.add_argument(
         "--run_type", help="Use pre_computed mode or instant mode",
-        default="Instant", type=str)
+        default="instant", type=str)
     return parser.parse_args()
 
 
