@@ -2,7 +2,7 @@
 # @Author:
 # @Date:   2018-01-29 14:12:46
 # @Last Modified by:   ghma
-# @Last Modified time: 2018-02-05 17:32:50
+# @Last Modified time: 2018-02-05 17:57:48
 from __future__ import division, print_function, absolute_import
 
 import argparse
@@ -149,8 +149,7 @@ def calc_cur_det(net, meta, encoder, seq_info, frame_idx, min_confidence):
         det.append(
             [frame_idx,result[j][0],result[j][2],result[j][3],result[j][4],result[j][5],result[j][1],-1,-1,-1]
             )
-
-    generate_detections_single(encoder, seq_info["image_filenames"][frame_idx].encode('utf-8'), np.asarray(det))
+    generate_detections_single(encoder, seq_info["image_filenames"][frame_idx], np.asarray(det))
     detection_list = []
     for row in det:
         bbox, confidence, feature = row[2:6], row[6], row[10:]

@@ -315,7 +315,9 @@ def _create_image_encoder(preprocess_fn, factory_fn, image_shape, batch_size=32,
     feature_dim = feature_var.get_shape().as_list()[-1]
 
     if session is None:
-        session = tf.Session()
+        config = tf.ConfigProto()
+        config.gpu_options.allow_growth = True
+        session = tf.Session(config=config)
     if checkpoint_path is not None:
         slim.get_or_create_global_step()
         init_assign_op, init_feed_dict = slim.assign_from_checkpoint(
