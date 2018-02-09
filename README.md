@@ -78,9 +78,9 @@ If you find DeepSORT useful in your research, please consider citing the followi
       doi={10.1109/ICIP.2016.7533003}
     }
 
- ## YOLOv2:Good, Good, Good
+ ## YOLOv2
 
- Umm, he do not like this.
+ Umm, he does not like this.
  [YOLOv2](https://pjreddie.com/darknet/)
 
 
