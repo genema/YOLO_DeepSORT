@@ -45,15 +45,15 @@ or
 python3 deep_sort_app.py --display true --run_type instant
 python3 deep_sort_app.py --display true --run_type pre_computed
 ```
-### see argparser() for more infomations about other arguments.
+see argparser() for further infomations about other arguments.
 
-### Have been tested under python 2.7/3.5/3.6 with tensorflow 1.2.0 (because I work with CUDA 8)
+Codes in this repo have been tested under python 2.7/3.5/3.6 with tensorflow 1.2.0 (with CUDA 8)
 
 # NOTICE
 The tensorflow ckpt file can be download from [here](https://owncloud.uni-koblenz.de/owncloud/s/f9JB0Jr7f3zzqs8).
 See [DeepSORT](https://github.com/nwojke/deep_sort).
 
-You can compile your own yolo lib file, but be sure that all the functions have the same usage as those in yolov2.py.
+You can also compile your own yolo lib file, but be sure that all the functions have the same usage as those in yolov2.py.
 
 # Citation
 
@@ -82,6 +82,9 @@ If you find DeepSORT useful in your research, please consider citing the followi
 
  Umm, he does not like this.
  [YOLOv2](https://pjreddie.com/darknet/)
+ 
+ ## And this repo
+ https://github.com/genema/YOLO_DeepSORT/
 
 
 
