@@ -80,7 +80,6 @@ If you find DeepSORT useful in your research, please consider citing the followi
 
  ## YOLOv2
 
- Umm, he does not like this.
  [YOLOv2](https://pjreddie.com/darknet/)
  
  ## And this repo
